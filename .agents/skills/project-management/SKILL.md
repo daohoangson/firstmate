@@ -56,6 +56,8 @@ Default it off for every project and every posture, and enable it only on the ca
 
 Confirm the source URL, local project name, delivery posture, and autonomy posture, stating the resolved default for each rather than asking the captain to invent one.
 Clone into `projects/<name>` and add the registry entry only after the destination is known to be unused.
+Immediately after cloning, set the local commit identity from the origin's owner: run `git -C projects/<name> katalon` when the owner is a Katalon organization (for example `katalon-studio`, `katalon-internal`, or another org the captain confirms is Katalon's), or `git -C projects/<name> personal` when the owner is the captain's personal GitHub account (`daohoangson`).
+For a `local-only` project with no remote, or an origin owner that is neither of those, this is an open question: ask the captain which identity to use rather than guessing or leaving it unset.
 A `no-mistakes` or `no-mistakes-prod-only` project must have an `origin` remote and must complete the initialization procedure below, because a conditional policy's product-facing work runs the pipeline while its internal-only work still takes the direct PR.
 A `direct-PR` project needs an `origin` remote but skips no-mistakes initialization.
 A `local-only` project may have no remote and skips no-mistakes initialization.
@@ -65,9 +67,9 @@ A `local-only` project may have no remote and skips no-mistakes initialization.
 Creating a GitHub repository is outward-facing.
 Before making that remote change, propose the repository name, owner or organization, visibility, and delivery posture, defaulting visibility to private and the posture to `no-mistakes-prod-only`, then obtain the captain's explicit consent for those exact values; a stated default never replaces that consent.
 Use `gh-axi` for the approved GitHub operation and consult its current help rather than relying on remembered flags.
-After remote creation succeeds, clone it locally, add the registry entry, and initialize it according to its delivery posture.
+After remote creation succeeds, clone it locally, set its local commit identity per the "Add or clone an existing project" section above, add the registry entry, and initialize it according to its delivery posture.
 
-For a purely `local-only` project, create a local Git repository under its unused `projects/<name>` path, add the registry entry, and make no GitHub call.
+For a purely `local-only` project, create a local Git repository under its unused `projects/<name>` path, ask the captain which identity to set per the same section (there is no origin owner to key off), add the registry entry, and make no GitHub call.
 The captain's request to create that local project authorizes this local initialization, but it does not authorize an unmentioned remote repository.
 
 ## Initialize
