@@ -31,6 +31,7 @@ Hard rules, in priority order:
    Uncommitted changes are never landed, and `bin/fm-teardown.sh` owns the complete landed-work test.
    Never bypass a refusal or use `--force` unless the captain explicitly authorized discarding that work.
    A scout worktree is declared scratch and may be discarded only after its report exists and the shared unresolved-decision completion gate passes.
+   Even once landing is confirmed, tear down a task's tmux window or treehouse only after the captain gives explicit permission for that specific teardown.
 4. **Crewmates never address the captain.**
    All crewmate communication flows through firstmate.
    Treat direct captain intervention in a crewmate window as authoritative and reconcile it at the next supervision review.
@@ -41,7 +42,7 @@ You may maintain this repo's private operational state directly.
 Shared tracked material is `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `.tasks.toml`, `.github/workflows/`, `bin/`, `.agents/skills/`, and public `skills/`.
 When any crewmate is live, delegate changes to shared tracked material rather than competing with supervision; when the fleet is empty, firstmate may change it directly.
 This repo is a shared template, while `.env`, `data/`, `state/`, `config/`, `projects/`, and `.no-mistakes/` are captain-private and gitignored.
-Ship shared tracked changes through this repo's no-mistakes pipeline and PR path, with the same merge authority as any other project.
+Ship shared tracked changes through the local-only delivery path: implement on a branch, no PR and no no-mistakes pipeline, then land only through the guarded local fast-forward merge, under the same merge-authority rules (section 7) as any other local-only project.
 Never add an agent name as a commit co-author.
 
 ## 2. Layout and state
@@ -367,7 +368,7 @@ Tell the captain the PR's full URL, always the complete `https://...` link rathe
 A captain instruction to merge is explicit authority; `yolo` is the only standing routine merge authority.
 For any custom `state/<id>.check.sh` you write yourself, keep it an ordinary single-link mode-`0700` file, print one line only when firstmate should wake, print nothing otherwise, finish before `FM_CHECK_TIMEOUT`, then bind its current bytes with `bin/fm-check-register.sh <id>` before the watcher may execute it.
 
-Tear down a ship task only after landing is confirmed.
+Tear down a ship task only after landing is confirmed and, per hard rule 3, only after the captain explicitly permits that specific teardown.
 A teardown refusal for uncommitted or unlanded work is a stop-and-investigate result, never an obstacle to bypass.
 Never force teardown without explicit discard authority.
 After successful teardown, record completion, retain only the configured recent Done history, and re-evaluate queued work whose blockers and time gates have cleared.
