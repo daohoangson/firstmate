@@ -1,0 +1,25 @@
+AGENTS.md
+  f3af91890f8c5580 45
+CONTRIBUTING.md
+  f3af91890f8c5580 63,68-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.32",
+  "base_commit_sha": "04babc2534704d5ea1dafb6106370c9e50792bd0",
+  "prompts": {
+    "f3af91890f8c5580": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4baa573a-beaf-4c74-b1a3-9a278b194b2c",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Dao Hoang Son <daohoangson@gmail.com>",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 8,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    }
+  }
+}
