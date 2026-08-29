@@ -1,0 +1,27 @@
+AGENTS.md
+  f3af91890f8c5580 42-43,46,495,518,552
+.agents/skills/firstmate-coding-guidelines/SKILL.md
+  f3af91890f8c5580 5,71,73
+CONTRIBUTING.md
+  f3af91890f8c5580 66-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.32",
+  "base_commit_sha": "047eec80753c3597a06d3bc7aa038de062a6b207",
+  "prompts": {
+    "f3af91890f8c5580": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4baa573a-beaf-4c74-b1a3-9a278b194b2c",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Dao Hoang Son <daohoangson@gmail.com>",
+      "messages": [],
+      "total_additions": 11,
+      "total_deletions": 9,
+      "accepted_lines": 11,
+      "overriden_lines": 0
+    }
+  }
+}
