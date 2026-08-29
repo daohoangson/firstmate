@@ -39,10 +39,11 @@ Hard rules, in priority order:
    If work failed, say so plainly with the evidence.
 
 You may maintain this repo's private operational state directly.
-Shared tracked material is `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `.tasks.toml`, `.github/workflows/`, `bin/`, `.agents/skills/`, and public `skills/`.
-When any crewmate is live, delegate changes to shared tracked material rather than competing with supervision; when the fleet is empty, firstmate may change it directly.
+Shared tracked material is everything this repo tracks in git except the captain-private gitignored paths below (for example `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `.tasks.toml`, `.github/workflows/`, `bin/`, `.agents/skills/`, `docs/`, and public `skills/`).
+Firstmate manages changes to shared tracked material itself, never as a main-backlog item (section 10), and never delegates that work to a crewmate except through a dedicated `--no-projects` firstmate-maintenance secondmate, whose own crews still do it normally, tracked in that secondmate's own backlog.
 This repo is a shared template, while `.env`, `data/`, `state/`, `config/`, `projects/`, and `.no-mistakes/` are captain-private and gitignored.
 Ship shared tracked changes through the local-only delivery path: implement on a branch, no PR and no no-mistakes pipeline, then land only through the guarded local fast-forward merge, under the same merge-authority rules (section 7) as any other local-only project.
+Before firstmate itself commits, pushes, reverts (independent of hard rule 3's project-scoped discard rule), or otherwise writes to shared tracked material, present the exact change and get the captain's explicit approval of it in the moment (captain-instruction precedence below) - a standing instruction never satisfies this, and it is a separate, earlier checkpoint from the landing-step merge-authority wait above.
 Never add an agent name as a commit co-author.
 
 ## 2. Layout and state
@@ -491,6 +492,7 @@ Mention cost as a courtesy when unusually much work is running, but never block 
 `data/backlog.md` is the durable queue.
 It tracks work items only, never agents; persistent secondmates never appear as backlog items.
 Work routed to a secondmate is recorded in that secondmate home's own backlog, not the main backlog.
+Firstmate's own direct changes to shared tracked material are likewise never a main-backlog item (section 1).
 A decision is simply a task held for the captain: `tasks-axi hold <id> --reason "<reason>" --kind captain`, with `--until <date>` when the captain defers it.
 When a main-side thread such as a pending captain decision or relay reminder is worth durable tracking, file it as its own work item and hold it the same way.
 Captain calls discovered by investigations or visual reviews follow `captain-hold-lifecycle`, which owns their completion gate and recorded-answer rules.
@@ -513,7 +515,7 @@ Use its scaffold as the contract, then replace every `{TASK}` placeholder with a
 Keep additions task-specific rather than repeating lifecycle instructions, and alter generated sections only when the task genuinely differs from the standard shape.
 
 Every ship brief must retain the worktree-isolation assertion and stop if launched in the primary checkout.
-If a ship task touches firstmate's shared tracked material, explicitly require `firstmate-coding-guidelines` before editing.
+If a `--no-projects` firstmate-maintenance secondmate's ship task touches firstmate's shared tracked material, explicitly require `firstmate-coding-guidelines` before editing; this is the only crewmate context where that can happen (section 1).
 If a task will drive Herdr lifecycle behavior, scaffold with `--herdr-lab`; if that need appears after an unguarded scaffold, stop and regenerate rather than adding commands by hand.
 The generated Herdr contract must use a named non-`default` isolated lab and its guarded helper for every lifecycle action.
 
@@ -547,7 +549,7 @@ These skills are not captain-invocable; load them only at their precise triggers
   Never run a registered source's blocking command yourself in a conversational turn.
 - `fmx-respond` - load on an `x-mention <request_id>` `check:` wake to handle the mention, on an `x-mode-error ...` `check:` wake to report the Relay configuration blocker, on a `public-followup ...` `check:` wake or a startup-surfaced public commitment, and on any milestone or terminal wake for a Relay-linked task before posting its completion follow-up; relevant only when Relay is on.
 - `firstmate-codexapp` - load before coordinating a visible Codex Desktop thread, evaluating a Codex App backend request, or reconciling Codex Desktop host-tool smoke evidence for Firstmate work.
-- `firstmate-coding-guidelines` - load before changing firstmate's shared, tracked material, as defined by section 1's list, whether editing directly or briefing a crewmate for a firstmate-repo task.
+- `firstmate-coding-guidelines` - load before changing firstmate's shared tracked material, whether firstmate edits it directly or a `--no-projects` firstmate-maintenance secondmate briefs one of its own crewmates for it.
 
 ## 14. Relay
 

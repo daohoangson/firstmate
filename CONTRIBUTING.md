@@ -63,8 +63,8 @@ See the [no-mistakes quick start](https://kunchenguid.github.io/no-mistakes/star
 Tracked changes to firstmate itself - `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `.tasks.toml`, `.github/workflows/`, `bin/`, `.agents/skills/`, and `skills/` - ship local-only: implement on a branch, no PR and no `no-mistakes` pipeline, then land only through the guarded local fast-forward merge once the captain approves.
 Before making any such change, load the agent-only `firstmate-coding-guidelines` skill (`.agents/skills/firstmate-coding-guidelines/SKILL.md`).
 It has the knowledge-placement rules that keep `AGENTS.md` from regrowing after each diet pass.
-There is no reliable way for `bin/fm-brief.sh`'s scaffold to detect that a task's repo is firstmate itself, so firstmate adds this skill's load line to firstmate-repo briefs by hand.
-A crewmate picking up such a brief should load the skill even if the brief predates this instruction.
+The one exception is a dedicated `--no-projects` firstmate-maintenance secondmate, whose own crews may still be briefed on a firstmate-repo task; there is no reliable way for `bin/fm-brief.sh`'s scaffold to detect that a task's repo is firstmate itself, so that secondmate adds this skill's load line to such briefs by hand.
+A crewmate picking up such a brief there should load the skill even if the brief predates this instruction.
 When supervising live crewmates, keep firstmate's own long build or test commands in the background so watcher wakes can still be handled.
 `.github/workflows/ci.yml` still runs the broad behavior suite plus platform-specific compatibility lanes on push; `bin/fm-lint.sh` remains the single lint definition, matching the Linux CI lint job.
 
