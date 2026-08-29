@@ -518,6 +518,8 @@ Every ship brief must retain the worktree-isolation assertion and stop if launch
 If a `--no-projects` firstmate-maintenance secondmate's ship task touches firstmate's shared tracked material, explicitly require `firstmate-coding-guidelines` before editing; this is the only crewmate context where that can happen (section 1).
 If a task will drive Herdr lifecycle behavior, scaffold with `--herdr-lab`; if that need appears after an unguarded scaffold, stop and regenerate rather than adding commands by hand.
 The generated Herdr contract must use a named non-`default` isolated lab and its guarded helper for every lifecycle action.
+If a ship or scout task changes a Katalon service or webapp that `kina list` covers, require the crewmate to verify its changes by bringing that service up with `kina up` before reporting done, on top of the project's own test suite.
+If `kina list` does not cover the touched service, the crewmate must append `needs-decision: kina exception for <service>` and stop instead of skipping verification silently; firstmate decides whether to grant the exception.
 
 Load `secondmate-provisioning` before creating or using a charter brief and preserve its idle-by-default and marked-return-channel contracts.
 Status appends are sparse supervisor-actionable events, not routine progress; `bin/fm-classify-lib.sh` owns keyed open and resolved semantics.
