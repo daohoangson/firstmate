@@ -1,0 +1,23 @@
+.agents/skills/project-management/SKILL.md
+  28f332ead69dcea7 59-60,70,72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.32",
+  "base_commit_sha": "b7af0e17c39009bebb0d7005d0c21f5665a397d4",
+  "prompts": {
+    "28f332ead69dcea7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "71b4a289-6bb8-473d-8025-5f02c04d73d6",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Dao Hoang Son <daohoangson@gmail.com>",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 2,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    }
+  }
+}
