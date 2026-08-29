@@ -27,6 +27,12 @@
 #   The flag must be explicit because {TASK} is filled after scaffolding and the
 #   caller-supplied repo string cannot reliably identify this repo. Briefs made
 #   without it carry a loud declaration so an omitted contract cannot be silent.
+#   --personal-repo marks the target repo as one of the captain's own (not Katalon's).
+#   It changes Rule 3 in the Rules section so the crewmate never uses gh-axi/gh there,
+#   since gh is authenticated as the work account (sonkatalon) - wrong identity for a
+#   personal PR/comment/issue/review. Firstmate resolves this from data/projects.md at
+#   intake and passes it explicitly, the same as --mode; this script never reads the
+#   registry itself.
 # For ship tasks, --mode is REQUIRED and shapes the definition of done. Firstmate
 # resolves it per task at intake (AGENTS.md section 7); data/projects.md holds the
 # captain's standing posture as context, and this script never reads it:
@@ -106,6 +112,7 @@ else
 fi
 KIND=ship
 HERDR_LAB=0
+PERSONAL_REPO=0
 NO_PROJECTS=0
 MODE=
 MODE_SET=0
@@ -127,6 +134,7 @@ for a in "$@"; do
     --scout) KIND=scout ;;
     --secondmate) KIND=secondmate ;;
     --herdr-lab) HERDR_LAB=1 ;;
+    --personal-repo) PERSONAL_REPO=1 ;;
     --no-projects) NO_PROJECTS=1 ;;
     --mode) want_value=mode ;;
     --mode=*) MODE=${a#--mode=}; MODE_SET=1 ;;
@@ -161,6 +169,11 @@ ID=${POS[0]}
 
 if [ "$KIND" = secondmate ] && [ "$HERDR_LAB" -eq 1 ]; then
   echo "error: --herdr-lab applies only to crewmate ship or scout briefs" >&2
+  exit 1
+fi
+
+if [ "$KIND" = secondmate ] && [ "$PERSONAL_REPO" -eq 1 ]; then
+  echo "error: --personal-repo applies only to crewmate ship or scout briefs" >&2
   exit 1
 fi
 
@@ -318,6 +331,12 @@ EOF
 HERDR_SECTION=${HERDR_SECTION%$'\n'}
 fi
 
+if [ "$PERSONAL_REPO" -eq 1 ]; then
+  GH_RULE='3. Do NOT use gh-axi/gh for this repo: it is authenticated as the work account (sonkatalon), the wrong identity for a personal repo. Plain `git push`/`fetch`/`pull` is fine (already correctly authenticated as your personal identity via SSH). If a PR, comment, review, or issue is genuinely needed, append `needs-decision: gh-axi identity mismatch for personal repo` and stop instead of using gh-axi. Use chrome-devtools-axi for browser operations as usual.'
+else
+  GH_RULE='3. Use gh-axi for GitHub operations and chrome-devtools-axi for browser operations.'
+fi
+
 if [ "$KIND" = scout ]; then
 cat > "$BRIEF" <<EOF
 You are a crewmate: an autonomous worker agent managed by firstmate. Work on your own; do not wait for a human.
@@ -336,7 +355,7 @@ The report is the only thing that survives, so anything worth keeping must be in
 # Rules
 1. Never push to any remote and never open a PR.
 2. Stay inside this worktree; the only files you may write outside it are the report and the status file below.
-3. Use gh-axi for GitHub operations and chrome-devtools-axi for browser operations.
+$GH_RULE
 4. Report status by appending one line:
    \`echo "{state}: {one short line}" >> $STATUS_FILE\`
    States: working, needs-decision, blocked, $PAUSED_VERB, done, failed.
@@ -452,7 +471,7 @@ If the top-level path is the primary checkout or not the worktree you were launc
 # Rules
 $RULE1
 2. Stay inside this worktree; modify nothing outside it.
-3. Use gh-axi for GitHub operations and chrome-devtools-axi for browser operations.
+$GH_RULE
 4. Report status by appending one line:
    \`echo "{state}: {one short line}" >> $STATUS_FILE\`
    States: working, needs-decision, blocked, $PAUSED_VERB, done, failed.
