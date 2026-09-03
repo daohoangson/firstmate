@@ -1,6 +1,7 @@
 # pr-review-scout-briefing
 
 Load before scaffolding a PR-review scout's brief.
+This guides firstmate's own brief-writing - a crewmate's worktree has no access to firstmate's `.agents/skills/`, so write each requirement directly into the brief text rather than telling the crewmate to load this skill by name.
 
 ## Anchor every review to a linked issue
 

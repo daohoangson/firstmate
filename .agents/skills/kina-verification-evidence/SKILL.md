@@ -2,6 +2,7 @@
 
 Load before scaffolding any ship or scout brief that requires live `kina` verification.
 `AGENTS.md` section 11 resolves the exact kina service name; this skill defines what counts as proof the crewmate exercised the real running service.
+This guides firstmate's own brief-writing - write each requirement directly into the brief text; a crewmate's worktree has no access to firstmate's `.agents/skills/`.
 
 ## Capture the real artifact
 
