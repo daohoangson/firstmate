@@ -1,0 +1,27 @@
+.agents/skills/kina-verification-evidence/SKILL.md
+  f3af91890f8c5580 1-26
+.agents/skills/pr-review-scout-briefing/SKILL.md
+  f3af91890f8c5580 1-35
+AGENTS.md
+  f3af91890f8c5580 45-46,522-523,526-527,551-552
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.32",
+  "base_commit_sha": "4df5b80c18e592fd75db48fdfbfb7079e51dd69f",
+  "prompts": {
+    "f3af91890f8c5580": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4baa573a-beaf-4c74-b1a3-9a278b194b2c",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Dao Hoang Son <daohoangson@gmail.com>",
+      "messages": [],
+      "total_additions": 84,
+      "total_deletions": 17,
+      "accepted_lines": 69,
+      "overriden_lines": 0
+    }
+  }
+}
