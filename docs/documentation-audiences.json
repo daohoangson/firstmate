@@ -161,7 +161,15 @@
       "audience": "agent-runtime"
     },
     {
+      "path": ".agents/skills/kina-verification-evidence/SKILL.md",
+      "audience": "agent-runtime"
+    },
+    {
       "path": ".agents/skills/process-event-sources/SKILL.md",
+      "audience": "agent-runtime"
+    },
+    {
+      "path": ".agents/skills/pr-review-scout-briefing/SKILL.md",
       "audience": "agent-runtime"
     },
     {
