@@ -42,8 +42,8 @@ You may maintain this repo's private operational state directly.
 Shared tracked material is everything this repo tracks in git except the captain-private gitignored paths below (for example `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `.tasks.toml`, `.github/workflows/`, `bin/`, `.agents/skills/`, `docs/`, and public `skills/`).
 Firstmate manages changes to shared tracked material itself, never as a main-backlog item (section 10), and never delegates that work to a crewmate except through a dedicated `--no-projects` firstmate-maintenance secondmate, whose own crews still do it normally, tracked in that secondmate's own backlog.
 This repo is a shared template, while `.env`, `data/`, `state/`, `config/`, `projects/`, and `.no-mistakes/` are captain-private and gitignored.
-Ship shared tracked changes through the local-only delivery path: implement on a branch, no PR and no no-mistakes pipeline, then land only through the guarded local fast-forward merge, under the same merge-authority rules (section 7) as any other local-only project.
-Before firstmate itself commits, pushes, reverts (independent of hard rule 3's project-scoped discard rule), or otherwise writes to shared tracked material, present the exact change and get the captain's explicit approval of it in the moment (captain-instruction precedence below) - a standing instruction never satisfies this, and it is a separate, earlier checkpoint from the landing-step merge-authority wait above.
+Ship shared tracked changes by committing directly to main - no branch, no PR, no no-mistakes pipeline, no merge step.
+Before firstmate itself commits, pushes, reverts (independent of hard rule 3's project-scoped discard rule), or otherwise writes to shared tracked material, present the exact change and get the captain's explicit approval of it in the moment (captain-instruction precedence below) - a standing instruction never satisfies this checkpoint itself, so it happens every time regardless of the direct-to-main posture above.
 Never add an agent name as a commit co-author.
 
 ## 2. Layout and state
@@ -519,7 +519,11 @@ If a `--no-projects` firstmate-maintenance secondmate's ship task touches firstm
 If a task will drive Herdr lifecycle behavior, scaffold with `--herdr-lab`; if that need appears after an unguarded scaffold, stop and regenerate rather than adding commands by hand.
 The generated Herdr contract must use a named non-`default` isolated lab and its guarded helper for every lifecycle action.
 If a ship or scout task changes a Katalon service or webapp that `kina list` covers, require the crewmate to verify its changes by bringing that service up with `kina up` before reporting done, on top of the project's own test suite.
+Firstmate resolves the exact service name itself before dispatch - run `kina list` and cross-reference it against the task's actual changed or to-be-changed file paths (a monorepo can host many services; match by directory, don't guess from the repo name) - and hands the crewmate the literal `kina up <service>` command rather than "check kina list and figure out which service."
+Load `kina-verification-evidence` for what counts as sufficient proof the crewmate actually exercised the real service, by service shape (backend, frontend, agent-backed, non-agent).
 If `kina list` does not cover the touched service, the crewmate must append `needs-decision: kina exception for <service>` and stop instead of skipping verification silently; firstmate decides whether to grant the exception.
+
+A crewmate or scout never clones a repo itself. When a task needs to read or touch a second repo, firstmate prepares that access the same way it allocates any other dispatched worktree: point at the existing read-only `projects/<name>` clone when the repo is registered, name an already-live worktree when one exists, or allocate a fresh disposable worktree through the normal treehouse-backed path `fm-spawn.sh` uses for any task otherwise, and hand the crewmate the resulting path. Do this proactively at brief time whenever a sibling repo is already known (a stacked or companion PR, a cross-repo consumer named in a prior investigation); when it is only discovered mid-task, the worker reports `blocked: <the repo it needs>` instead of cloning one itself, and firstmate allocates the path the same way and sends it back through `fm-send`.
 
 Load `secondmate-provisioning` before creating or using a charter brief and preserve its idle-by-default and marked-return-channel contracts.
 Status appends are sparse supervisor-actionable events, not routine progress; `bin/fm-classify-lib.sh` owns keyed open and resolved semantics.
@@ -544,6 +548,8 @@ These skills are not captain-invocable; load them only at their precise triggers
 - `firstmate-orca` - load before switching to Orca, spawning or supervising Orca-backed work, smoke-testing Orca backend behavior, debugging Orca task state, or reconciling Orca-backed task metadata.
 - `project-management` - load before adding, creating, removing, or initializing a project.
   Cloning or registering a project is add intake and uses the same trigger.
+- `pr-review-scout-briefing` - load before scaffolding a PR-review scout's brief.
+- `kina-verification-evidence` - load before scaffolding any ship or scout brief that requires live `kina` verification.
 - `stuck-crewmate-recovery` - load when the session-start digest reports an ordinary direct report's endpoint dead or its metadata has no window, or after a stale wake, looping pane, repeated confusion, an answered-by-brief question, an unresponsive crewmate, or a failed steer.
 - `secondmate-provisioning` - load before creating, seeding, validating, launching, handing backlog to, recovering, pushing inherited local material into, or retiring a secondmate home, and before editing `data/secondmates.md`.
 - `captain-hold-lifecycle` - load before treating an investigation or visual review as complete, before ending a visual review that exposed a captain decision, when recording or routing the captain's answer, and on any `RECORD DIVERGENCE` line from the wake drain.
