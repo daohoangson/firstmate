@@ -1,3 +1,12 @@
+---
+name: pr-review-scout-briefing
+description: >-
+  Agent-only guidance for preparing PR-review scout briefs.
+  Use before scaffolding a PR-review scout's brief.
+metadata:
+  internal: true
+---
+
 # pr-review-scout-briefing
 
 Load before scaffolding a PR-review scout's brief.

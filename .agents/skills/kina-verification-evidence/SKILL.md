@@ -1,3 +1,12 @@
+---
+name: kina-verification-evidence
+description: >-
+  Agent-only guidance for defining live kina verification evidence.
+  Use before scaffolding any ship or scout brief that requires live kina verification.
+metadata:
+  internal: true
+---
+
 # kina-verification-evidence
 
 Load before scaffolding any ship or scout brief that requires live `kina` verification.
