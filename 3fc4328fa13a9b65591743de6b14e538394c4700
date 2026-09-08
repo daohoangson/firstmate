@@ -1,0 +1,23 @@
+bin/fm-brief.sh
+  1c2572adebc2297f 37-42,127,149,187-191,369-374,392,479
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.32",
+  "base_commit_sha": "3fc4328fa13a9b65591743de6b14e538394c4700",
+  "prompts": {
+    "1c2572adebc2297f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4470a426-2d1f-4056-9b30-6ccf30355cd8",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Dao Hoang Son <daohoangson@gmail.com>",
+      "messages": [],
+      "total_additions": 21,
+      "total_deletions": 2,
+      "accepted_lines": 21,
+      "overriden_lines": 0
+    }
+  }
+}
