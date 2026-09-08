@@ -1,0 +1,27 @@
+CONTRIBUTING.md
+  1c2572adebc2297f 64,67
+AGENTS.md
+  1c2572adebc2297f 38,46-47,49-50,512,536,570
+.agents/skills/firstmate-coding-guidelines/SKILL.md
+  1c2572adebc2297f 5,71,73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.32",
+  "base_commit_sha": "1f93ef45ee984563131655ae34113b4c9a5ba56b",
+  "prompts": {
+    "1c2572adebc2297f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4470a426-2d1f-4056-9b30-6ccf30355cd8",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Dao Hoang Son <daohoangson@gmail.com>",
+      "messages": [],
+      "total_additions": 13,
+      "total_deletions": 10,
+      "accepted_lines": 13,
+      "overriden_lines": 0
+    }
+  }
+}
