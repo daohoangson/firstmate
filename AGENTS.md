@@ -537,6 +537,12 @@ If a `--no-projects` firstmate-maintenance secondmate's ship task touches firstm
 If a task will drive Herdr lifecycle behavior, scaffold with `--herdr-lab`; if that need appears after an unguarded scaffold, stop and regenerate rather than adding commands by hand.
 The generated Herdr contract must use a named non-`default` isolated lab and its guarded helper for every lifecycle action.
 
+A crewmate or scout never clones a repo itself.
+When a task needs to read a second repo, firstmate hands over the simplest access that works: the captain's own existing local checkout (`~/repos/katalon/<name>` or `~/repos/daohoangson/<name>`) when one exists, treated read-only since it is the captain's live working copy, not a disposable worktree.
+When no such checkout exists, or the task genuinely needs to write there, fall back to the existing read-only `projects/<name>` clone when the repo is registered, an already-live worktree when one exists, or a fresh disposable worktree through the normal treehouse-backed path `fm-spawn.sh` uses for any task.
+Prepare this proactively at brief time whenever a sibling repo is already known (a stacked or companion PR, a cross-repo consumer named in a prior investigation).
+When a worker discovers the need mid-task, it reports `blocked: <the repo it needs>`, and firstmate allocates the path the same way and sends it back through `fm-send`.
+
 Load `secondmate-provisioning` before creating or using a charter brief and preserve its idle-by-default and marked-return-channel contracts.
 Status appends are sparse supervisor-actionable events, not routine progress; `bin/fm-classify-lib.sh` owns keyed open and resolved semantics.
 The scaffold is a safety contract, not a suggestion.
