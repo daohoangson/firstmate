@@ -1,4 +1,6 @@
 {
+  "model": "claude-sonnet-5",
+  "effortLevel": "low",
   "hooks": {
     "SessionStart": [
       {
