@@ -2,7 +2,7 @@
 name: firstmate-coding-guidelines
 description: >-
   Agent-only reference for changing firstmate's shared, tracked material per AGENTS.md section 1.
-  Use before editing any of that material, whether working as firstmate directly or as a crewmate briefed on a firstmate-repo task.
+  Use before editing any of that material, whether firstmate is working directly or a `--no-projects` firstmate-maintenance secondmate is briefing one of its own crewmates for a firstmate-repo task.
   Covers the knowledge-placement decision tree, the one-owner rule for contracts, the inline-stub pattern for content moved into a skill, AGENTS.md size discipline, trigger hygiene for new skills, and repo style rules (one sentence per line, plain dash, no agent co-author, shellcheck-clean bin scripts, colocated tests, and maintainer-verification evidence).
 user-invocable: false
 metadata:
@@ -68,9 +68,9 @@ When in doubt, write the fact into the skill or doc first by patching that owner
 A new skill is dead weight if nothing loads it.
 Every new skill needs its load trigger declared inline: section 13 for agent-only reference skills, or the relevant operating section for anything else.
 State the trigger as a condition ("load before X", "load on Y wake"), never as a vague pointer.
-Briefs for tasks that touch firstmate's own tracked material should tell the crewmate to load this skill.
+Briefs for a `--no-projects` firstmate-maintenance secondmate's own crewmate tasks that touch firstmate's own tracked material should tell the crewmate to load this skill; this is the only crewmate context where that material is touched at all (AGENTS.md section 1).
 `bin/fm-brief.sh`'s `REPO` argument is a caller-supplied string with no reliable signal that it names firstmate's own repo, unlike a project registered in `data/projects.md`, so there is no clean point inside the scaffold to detect this case automatically.
-Firstmate adds this skill's load instruction to firstmate-repo briefs by hand instead.
+That secondmate adds this skill's load instruction to such briefs by hand instead.
 `CONTRIBUTING.md`'s "Development" section carries the same instruction as a durable reminder.
 
 ## Compatibility and enforcement
