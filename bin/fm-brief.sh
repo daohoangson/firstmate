@@ -565,6 +565,17 @@ IFS= read -r -d '' SHARED_INFRA_RULE <<'EOF' || true
    `blocked [at=<epoch>]: {what you need}` and stop; firstmate arranges it.
 EOF
 SHARED_INFRA_RULE=${SHARED_INFRA_RULE%$'\n'}
+# gh is authenticated as the work account, the wrong identity for a repo the
+# captain owns personally, so crewmates on one never use it.
+case "$(git -C "$FM_HOME/projects/$REPO" remote get-url origin 2>/dev/null)" in
+  *github.com[:/]daohoangson/*) PERSONAL_REPO=1 ;;
+  *) PERSONAL_REPO=0 ;;
+esac
+if [ "$PERSONAL_REPO" -eq 1 ]; then
+  GH_RULE='3. Do NOT use gh-axi/gh for this repo: it is authenticated as the work account (sonkatalon), the wrong identity for a personal repo. Plain `git push`/`fetch`/`pull` is fine (already correctly authenticated as your personal identity via SSH). If a PR, comment, review, or issue is genuinely needed, append `needs-decision: gh-axi identity mismatch for personal repo` and stop instead of using gh-axi. Use chrome-devtools-axi for browser operations as usual.'
+else
+  GH_RULE='3. Use gh-axi for GitHub operations and chrome-devtools-axi for browser operations.'
+fi
 
 if [ "$KIND" = scout ]; then
 if "$SCRIPT_DIR/fm-bootstrap.sh" lavish-compatible >/dev/null 2>&1; then
@@ -588,7 +599,7 @@ The report is the only thing that survives, so anything worth keeping must be in
 # Rules
 1. Never push to any remote and never open a PR.
 2. Stay inside this worktree; the only files you may write outside it are the report and the status file below.
-3. Use gh-axi for GitHub operations and chrome-devtools-axi for browser operations.
+$GH_RULE
 4. Report status by appending one line:
    \`$STATUS_APPEND\`
    States: working, needs-decision, blocked, $PAUSED_VERB, done, failed.
@@ -662,7 +673,7 @@ If the top-level path is the primary checkout or not the worktree you were launc
 # Rules
 $RULE1
 2. Stay inside this worktree; modify nothing outside it.
-3. Use gh-axi for GitHub operations and chrome-devtools-axi for browser operations.
+$GH_RULE
 4. Report status by appending one line:
    \`$STATUS_APPEND\`
    States: working, needs-decision, blocked, $PAUSED_VERB, done, failed.
