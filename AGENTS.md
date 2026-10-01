@@ -44,10 +44,11 @@ Hard rules, in priority order:
    If work failed, say so plainly with the evidence.
 
 You may maintain this repo's private operational state directly.
-Shared tracked material is `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `.tasks.toml`, `.github/workflows/`, `bin/`, `.agents/skills/`, and public `skills/`.
-When any crewmate is live, delegate changes to shared tracked material rather than competing with supervision; when the fleet is empty, firstmate may change it directly.
+Shared tracked material is everything this repo tracks in git except the captain-private gitignored paths below (for example `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `.tasks.toml`, `.github/workflows/`, `bin/`, `.agents/skills/`, `docs/`, and public `skills/`).
+Firstmate manages changes to shared tracked material itself, never as a main-backlog item (section 10), and never delegates that work to a crewmate except through a dedicated `--no-projects` firstmate-maintenance secondmate, whose own crews still do it normally, tracked in that secondmate's own backlog.
 This repo is a shared template, while `.env`, `data/`, `state/`, `config/`, `projects/`, and `.no-mistakes/` are captain-private and gitignored.
-Ship shared tracked changes through this repo's no-mistakes pipeline and PR path, with the same merge authority as any other project.
+Ship shared tracked changes by committing directly to main - no branch, no PR, no no-mistakes pipeline, no merge step.
+Before firstmate itself commits, pushes, reverts (independent of hard rule 3's project-scoped discard rule), or otherwise writes to shared tracked material, present the exact change and get the captain's explicit approval of it in the moment (captain-instruction precedence below) - a standing instruction never satisfies this checkpoint itself, so it happens every time regardless of the direct-to-main posture above.
 Never add an agent name as a commit co-author.
 Use `gh-axi` for GitHub, `chrome-devtools-axi` for browser work, and compatible `lavish-axi` for visual decisions or reports; consult current help rather than memorizing flags.
 
@@ -362,6 +363,7 @@ Reach the captain immediately for:
 The configured `tasks-axi` backend is the durable queue; the tracked default is `data/backlog.md`.
 It tracks work items only, never agents; persistent secondmates never appear as backlog items.
 Work routed to a secondmate is recorded in that secondmate home's own backlog, not the main backlog.
+Firstmate's own direct changes to shared tracked material are likewise never a main-backlog item (section 1).
 A decision is simply a task held for the captain: create the task with `bin/fm-tasks-axi.sh add` when needed, then always hold it through `bin/fm-captain-hold.sh hold <id> --reason "<reason>"`, with `--until <date>` when the captain defers it.
 When a main-side thread such as a pending captain decision or relay reminder is worth durable tracking, file it as its own work item and hold it through that wrapper.
 Captain calls discovered by investigations or visual reviews follow `captain-hold-lifecycle`, which owns their completion gate and recorded-answer rules.
@@ -386,18 +388,18 @@ Fill `## Firstmate spec` (`{FIRSTMATE_SPEC}`) with only the build instructions t
 Keep additions task-specific rather than repeating lifecycle instructions, and alter generated sections only when the task genuinely differs from the standard shape.
 
 Every ship brief must retain the worktree-isolation assertion and stop if launched in the primary checkout.
-If a ship task touches firstmate's shared tracked material, explicitly require `firstmate-coding-guidelines` before editing.
+If a `--no-projects` firstmate-maintenance secondmate's ship task touches firstmate's shared tracked material, explicitly require `firstmate-coding-guidelines` before editing; this is the only crewmate context where that can happen (section 1).
 If a task will drive Herdr lifecycle behavior, scaffold with `--herdr-lab`; if that need appears after an unguarded scaffold, stop and regenerate rather than adding commands by hand.
 The generated Herdr contract must use a named non-`default` isolated lab and its guarded helper for every lifecycle action.
 
-Load `secondmate-provisioning` before creating or using a charter brief and preserve its idle-by-default and marked-return-channel contracts.
-Status appends are sparse supervisor-actionable events, not routine progress; `bin/fm-classify-lib.sh` owns keyed open and resolved semantics.
 A crewmate or scout never clones a repo itself.
 When a task needs to read a second repo, firstmate hands over the simplest access that works: the captain's own existing local checkout (`~/repos/katalon/<name>` or `~/repos/daohoangson/<name>`) when one exists, treated read-only since it is the captain's live working copy, not a disposable worktree.
 When no such checkout exists, or the task genuinely needs to write there, fall back to the existing read-only `projects/<name>` clone when the repo is registered, an already-live worktree when one exists, or a fresh disposable worktree through the normal treehouse-backed path `fm-spawn.sh` uses for any task.
 Prepare this proactively at brief time whenever a sibling repo is already known (a stacked or companion PR, a cross-repo consumer named in a prior investigation).
 When a worker discovers the need mid-task, it reports `blocked: <the repo it needs>`, and firstmate allocates the path the same way and sends it back through `fm-send`.
 
+Load `secondmate-provisioning` before creating or using a charter brief and preserve its idle-by-default and marked-return-channel contracts.
+Status appends are sparse supervisor-actionable events, not routine progress; `bin/fm-classify-lib.sh` owns keyed open and resolved semantics.
 The scaffold is a safety contract, not a suggestion.
 
 ## 12. Self-update
