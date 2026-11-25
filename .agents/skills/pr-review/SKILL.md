@@ -43,7 +43,7 @@ When the home has neither file, write the spec from the inventory and the captai
 Scaffold the brief with `bin/fm-brief.sh <id> <repo> --scout --pr-review <pr-url> --pr-head <sha>`, adding `--prior-report <path>` for a re-review.
 Take the head from step 1's `headRefOid`, never from an earlier brief.
 For a re-review, pass the report of the round that reviewed the prior head and confirm that report names that head.
-With `config/pr-review-guard` on, the spawn refuses a declared head the PR no longer has and a prior report that does not exist (docs/configuration.md "PR-review guard").
+With `config/pr-review-guard` on, a fresh spawn refuses a declared head the PR no longer has and a prior report that does not exist (docs/configuration.md "PR-review guard").
 
 ## 4. Keep evidence beside the report
 
