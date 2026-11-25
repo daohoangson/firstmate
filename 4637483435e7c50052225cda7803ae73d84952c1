@@ -1,0 +1,29 @@
+tests/fm-pr-review.test.sh
+  d34ce642c71f2c5d 1-80,82-168,170-179,181-191
+bin/fm-pr-review-lib.sh
+  d34ce642c71f2c5d 1-68,70-132
+.agents/skills/pr-review/SKILL.md
+  d34ce642c71f2c5d 1-67
+bin/fm-pr-review-done.sh
+  d34ce642c71f2c5d 1-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.32",
+  "base_commit_sha": "4637483435e7c50052225cda7803ae73d84952c1",
+  "prompts": {
+    "d34ce642c71f2c5d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9b005dd6-e588-4d51-82cc-348fc6b82672",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Dao Hoang Son <daohoangson@gmail.com>",
+      "messages": [],
+      "total_additions": 452,
+      "total_deletions": 0,
+      "accepted_lines": 448,
+      "overriden_lines": 4
+    }
+  }
+}
