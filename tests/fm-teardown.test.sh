@@ -1974,6 +1974,28 @@ prepare_scout_teardown() {
   printf '%s\n' 'decisions_reviewed=1' >> "$case_dir/state/task-x1.meta"
 }
 
+test_pr_review_teardown_warns_and_continues() {
+  local case_dir rc
+  case_dir=$(make_case pr-review-warning)
+  write_meta "$case_dir" no-mistakes scout
+  prepare_scout_teardown "$case_dir"
+  printf '%s\n' \
+    'PR review: https://github.com/acme/widgets/pull/42 head=1111111111111111111111111111111111111111' \
+    > "$case_dir/data/task-x1/brief.md"
+
+  set +e
+  run_teardown "$case_dir" > "$case_dir/stdout" 2> "$case_dir/stderr"
+  rc=$?
+  set -e
+
+  expect_code 0 "$rc" "pr-review-warning: teardown should continue after its reminder"
+  assert_grep "warning: task-x1 reviews https://github.com/acme/widgets/pull/42; review workers stay until the captain says they are done with that PR" \
+    "$case_dir/stderr" "pr-review-warning: teardown did not print the captain-retention reminder"
+  assert_absent "$case_dir/state/task-x1.meta" \
+    "pr-review-warning: warning-only reminder blocked teardown"
+  pass "PR-review teardown warns about captain retention but completes normally"
+}
+
 # Clone a nested repository into the copy and add one plain scratch file.
 seed_nested_clone_and_scratch() {
   local case_dir=$1 wt=$2
@@ -6592,3 +6614,4 @@ test_process_spawned_during_grace_is_reaped_on_later_pass
 test_persistent_scan_refuses_after_bounded_retries
 test_process_exit_during_identity_lookup_does_not_refuse
 test_run_abort_precedes_process_reap_precedes_worktree_removal
+test_pr_review_teardown_warns_and_continues

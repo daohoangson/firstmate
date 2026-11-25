@@ -15,12 +15,19 @@
 # sections when the task genuinely deviates (e.g. working an existing external
 # PR instead of shipping a new one).
 # Usage: fm-brief.sh <task-id> <repo-name> --mode <no-mistakes|direct-PR|local-only> [--branch-prefix <prefix>] [--base-branch <branch>] [--forge <none|gerrit|forgejo|external> [--shape squash]] [--pr <auto|manual>] [--herdr-lab]
-#        fm-brief.sh <task-id> <repo-name> --scout [--base-branch <branch>] [--herdr-lab]
+#        fm-brief.sh <task-id> <repo-name> --scout [--base-branch <branch>] [--pr-review <pr-url>] [--herdr-lab]
 #        fm-brief.sh <task-id> --secondmate {<project>...|--no-projects}
 #   --scout writes the scout contract instead: the deliverable is a report at
 #   data/<task-id>/report.md (no branch, no push, no PR) and the worktree is scratch.
 #   It offers the Lavish review loop only when `fm-bootstrap.sh lavish-compatible`
 #   confirms the legacy board-compatibility floor; otherwise it asks for a text report.
+#   --pr-review <pr-url> marks a scout as a review of that existing PR. It reads
+#   the PR's current head with `gh pr view --json headRefOid` and writes a
+#   "PR review: <pr-url> head=<sha>" line under `# Setup` (the review marker
+#   bin/fm-teardown.sh reads), refusing the scaffold when gh cannot read it.
+#   When data/review-spec.md exists, its `## Reviewer instructions` section is
+#   pasted under `## Firstmate spec`; a `### Focus` placeholder points at
+#   data/review-focus.md for firstmate to fill per PR (pr-review skill).
 #   --secondmate writes a persistent secondmate charter. The project list
 #   is cloned into the secondmate home, while the natural-language scope
 #   tells the main firstmate when to route work there; routine churn stays in its own home;
@@ -235,6 +242,8 @@ UPSTREAM_CONSENT=
 UPSTREAM_CONSENT_SET=0
 PROJECT_DIR=
 PROJECT_DIR_SET=0
+PR_REVIEW_URL=
+PR_REVIEW_SET=0
 POS=()
 want_value=
 for a in "$@"; do
@@ -251,6 +260,7 @@ for a in "$@"; do
       pr) PR_TEXT=$a; PR_TEXT_SET=1 ;;
       upstream-consent) UPSTREAM_CONSENT=$a; UPSTREAM_CONSENT_SET=1 ;;
       project) PROJECT_DIR=$a; PROJECT_DIR_SET=1 ;;
+      pr-review) PR_REVIEW_URL=$a; PR_REVIEW_SET=1 ;;
       *) echo "error: internal parser state for --$want_value" >&2; exit 1 ;;
     esac
     want_value=
@@ -277,6 +287,8 @@ for a in "$@"; do
     --upstream-consent=*) UPSTREAM_CONSENT=${a#--upstream-consent=}; UPSTREAM_CONSENT_SET=1 ;;
     --project) want_value="project" ;;
     --project=*) PROJECT_DIR=${a#--project=}; PROJECT_DIR_SET=1 ;;
+    --pr-review) want_value="pr-review" ;;
+    --pr-review=*) PR_REVIEW_URL=${a#--pr-review=}; PR_REVIEW_SET=1 ;;
     # yolo never reaches the worker: it is firstmate's merge authority, not a
     # brief input. Refuse it loudly so it is never silently dropped here and then
     # believed to have been recorded.
@@ -353,6 +365,19 @@ if [ "$BASE_BRANCH_SET" -eq 1 ]; then
     exit 1
   fi
   fm_base_branch_valid "$BASE_BRANCH" "$MODE" "$FORGE" "fm-brief.sh --base-branch" || exit 1
+fi
+PR_REVIEW_HEAD=
+if [ "$PR_REVIEW_SET" -eq 1 ]; then
+  [ "$KIND" = scout ] || { echo "error: --pr-review applies only to scout briefs; a PR review is a scout task" >&2; exit 1; }
+  [[ $PR_REVIEW_URL =~ ^https://[^[:space:]/]+/[^[:space:]/]+/[^[:space:]/]+/pull/[0-9]+$ ]] || {
+    echo "error: --pr-review takes a full https://<host>/<owner>/<repo>/pull/<number> URL (got '$PR_REVIEW_URL')" >&2
+    exit 1
+  }
+  PR_REVIEW_HEAD=$(gh pr view "$PR_REVIEW_URL" --json headRefOid -q .headRefOid 2>/dev/null) || PR_REVIEW_HEAD=
+  [[ $PR_REVIEW_HEAD =~ ^[0-9a-f]{40}$ ]] || {
+    echo "error: could not read the current head of $PR_REVIEW_URL with gh pr view; check gh authentication and the URL, then scaffold again" >&2
+    exit 1
+  }
 fi
 if [ "$KIND" != ship ]; then
   [ "$UPSTREAM_CONSENT_SET" -eq 0 ] || {
@@ -649,6 +674,20 @@ IFS= read -r -d '' TASK_SECTION <<'EOF' || true
 {FIRSTMATE_SPEC}
 EOF
 TASK_SECTION=${TASK_SECTION%$'\n'}
+if [ -n "$PR_REVIEW_HEAD" ]; then
+  if [ -f "$DATA/review-spec.md" ]; then
+    REVIEW_INSTRUCTIONS=$(awk '
+      /^## / { if (grab) exit; if ($0 ~ /^## Reviewer instructions/) { grab = 1; next } }
+      grab { print }
+    ' "$DATA/review-spec.md")
+    [ -z "$REVIEW_INSTRUCTIONS" ] || TASK_SECTION="$TASK_SECTION
+$REVIEW_INSTRUCTIONS"
+  fi
+  TASK_SECTION="$TASK_SECTION
+
+### Focus
+{FOCUS: only the data/review-focus.md entries matching this PR's paths and signals, one to five PR-specific hypotheses, and the threat-model scope}"
+fi
 
 # One shared string keeps the ship and scout infrastructure rule identical.
 # Rule 2 governs file edits, so it does not prohibit pool administration.
@@ -696,6 +735,17 @@ else
 fi
 
 if [ "$KIND" = scout ]; then
+SCOUT_WRITE_SCOPE="the report and status file below"
+SCOUT_SURVIVAL_LINE="The report is the only thing that survives, so anything worth keeping must be in it."
+PR_REVIEW_EVIDENCE_LINE=
+if [ -n "$PR_REVIEW_HEAD" ]; then
+  SCOUT_WRITE_SCOPE="the report, its evidence directory \`$DATA/$ID/evidence/\`, and the status file below"
+  SCOUT_SURVIVAL_LINE="The report and its evidence directory survive teardown, so save anything worth keeping in one of them."
+  PR_REVIEW_EVIDENCE_LINE="For this PR review, save command output, screenshots, and other review evidence in \`$DATA/$ID/evidence/\`, not only in this worktree."
+  SETUP_BASE="$SETUP_BASE
+PR review: $PR_REVIEW_URL head=$PR_REVIEW_HEAD
+Review exactly that head of that existing pull request."
+fi
 if "$SCRIPT_DIR/fm-bootstrap.sh" lavish-compatible >/dev/null 2>&1; then
   LAVISH_LINE='If your deliverable is a visual artifact the captain will review and iterate on, use the lavish-axi rule: arm your board with bin/fm-procevent-lavish.sh arm <artifact.html> --for <task-id>; never run lavish-axi poll yourself. Re-arm with the reply after each nonterminal round to acknowledge it, route the board feedback through your steering inbox, write needs-decision [key=board-review] with the live board URL when the captain owes a decision, and stop at session_ended or an empty End without re-arming - acknowledge that final round with bin/fm-procevent.sh handled <source-id> <sequence> to conclude and retire your board.'
 else
@@ -712,11 +762,11 @@ $HERDR_SECTION
 $SETUP_BASE
 This is a SCOUT task: the deliverable is a written report, not a PR.
 The worktree is your laboratory - install, run, edit, and make scratch commits freely; all of it is discarded at teardown.
-The report is the only thing that survives, so anything worth keeping must be in it.
+$SCOUT_SURVIVAL_LINE
 
 # Rules
 1. Never push to any remote and never open a PR.
-2. Stay inside this worktree; outside it, write only the report and status file below, except for the task's empty-inventory attestation through \`fm-captain-hold.sh complete --none\`, exactly as specified under Definition of done.
+2. Stay inside this worktree; outside it, write only $SCOUT_WRITE_SCOPE, except for the task's empty-inventory attestation through \`fm-captain-hold.sh complete --none\`, exactly as specified under Definition of done.
 3. Use gh-axi for GitHub operations and chrome-devtools-axi for browser operations.
 4. Report status by appending one line:
    \`$STATUS_APPEND\`
@@ -742,6 +792,7 @@ $WAIT_BLOCK$INBOX_SECTION
 # Definition of done
 Write your findings to \`$DATA/$ID/report.md\`.
 The report must stand alone: what you did, what you found, the evidence (commands run, output, file:line references), and what you recommend.
+$PR_REVIEW_EVIDENCE_LINE
 $LAVISH_LINE
 Before reporting done, read and follow \`$FM_ROOT/.agents/skills/captain-hold-lifecycle/SKILL.md\` and pass its shared completion gate for the report and any visual review.
 Only when the reviewed inventory is empty, run \`FM_HOME=$(shell_quote "$FM_HOME") bash $(shell_quote "$FM_ROOT/bin/fm-captain-hold.sh") complete $(shell_quote "$ID") --none\`.

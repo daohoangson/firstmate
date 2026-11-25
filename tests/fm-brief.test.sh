@@ -26,6 +26,45 @@ mkdir -p "$BRIEF_HOME/data"
 # CI and locally, where the issue #958/#1069 parser bug does not fire, so this
 # is a weak guard on its own; test_no_heredoc_in_command_substitution and the
 # macos-stock-bash CI job carry the real cross-version enforcement.
+# --pr-review writes the PR's current head (read from gh), pastes the home's
+# reviewer instructions when data/review-spec.md has them, and leaves a Focus
+# placeholder; an unreadable head refuses the scaffold.
+test_pr_review_scout_brief() {
+  local home fakebin brief out
+  home="$TMP_ROOT/pr-review-home"
+  fakebin="$TMP_ROOT/pr-review-bin"
+  mkdir -p "$home/data" "$fakebin"
+  cat > "$fakebin/gh" <<'SH'
+#!/bin/sh
+[ -n "$FAKE_GH_HEAD" ] || exit 1
+printf '%s\n' "$FAKE_GH_HEAD"
+SH
+  chmod +x "$fakebin/gh"
+  printf '%s\n' '# Spec' '## Checklist' 'firstmate only' '## Reviewer instructions (paste)' '- Flag issues, do not fix them.' '## Later' 'not pasted' \
+    > "$home/data/review-spec.md"
+  FAKE_GH_HEAD=1111111111111111111111111111111111111111 PATH="$fakebin:$PATH" FM_HOME="$home" \
+    "$ROOT/bin/fm-brief.sh" rv-a proj --scout --pr-review https://github.com/acme/widgets/pull/42 >/dev/null 2>&1 \
+    || fail "a --pr-review scout brief should scaffold"
+  brief="$home/data/rv-a/brief.md"
+  assert_grep "PR review: https://github.com/acme/widgets/pull/42 head=1111111111111111111111111111111111111111" "$brief" \
+    "the review brief did not record the PR's current head"
+  assert_grep "- Flag issues, do not fix them." "$brief" "the reviewer instructions were not pasted"
+  assert_no_grep "firstmate only" "$brief" "a section outside the reviewer instructions was pasted"
+  assert_no_grep "not pasted" "$brief" "the section after the reviewer instructions was pasted"
+  assert_grep "{FOCUS: only the data/review-focus.md entries" "$brief" "the Focus placeholder is missing"
+  assert_grep "save command output, screenshots, and other review evidence" "$brief" \
+    "the review brief did not direct durable evidence storage"
+  assert_grep "$home/data/rv-a/evidence/" "$brief" \
+    "the review brief did not name its durable evidence directory"
+  assert_no_grep "The report is the only thing that survives" "$brief" \
+    "the review brief contradicted its evidence-retention instruction"
+  out=$(FAKE_GH_HEAD='' PATH="$fakebin:$PATH" FM_HOME="$home" \
+    "$ROOT/bin/fm-brief.sh" rv-b proj --scout --pr-review https://github.com/acme/widgets/pull/42 2>&1) \
+    && fail "an unreadable PR head should refuse the scaffold"
+  assert_contains "$out" "could not read the current head" "the unreadable-head refusal did not say so"
+  pass "fm-brief.sh: --pr-review records the current head, pastes reviewer instructions, and leaves a Focus placeholder"
+}
+
 test_script_parses() {
   local out rc
   out=$(bash -n "$ROOT/bin/fm-brief.sh" 2>&1); rc=$?
@@ -1733,3 +1772,4 @@ test_branch_prefix_is_refused_where_it_does_not_apply
 test_branch_prefix_value_is_validated
 test_branch_prefix_command_is_shell_safe
 test_crewmate_scaffolds_forbid_pool_administration
+test_pr_review_scout_brief

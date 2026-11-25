@@ -82,6 +82,9 @@
 # for the common case where there is no remote at all.
 # Safety is proved again after task processes are reaped, before backlog-close
 # publication, branch deletion, or worktree return.
+# A scout whose brief carries the bin/fm-brief.sh --pr-review marker gets one
+# warning that review workers stay until the captain is done with that PR;
+# cleanup then continues normally.
 # Scout tasks (kind=scout in meta) carve out of that check: their worktree is
 # declared scratch and the report at data/<task-id>/report.md is the work
 # product. Teardown proceeds only once the report exists and the shared
@@ -684,6 +687,12 @@ if [ "$TEARDOWN_META_KIND" = secondmate ]; then
     exit 1
   }
   SM_LIVENESS_LOCK="$STATE/.secondmate-liveness-$ID.lock"
+fi
+# A PR-review scout (bin/fm-brief.sh --pr-review marker) stays alive until the
+# captain is done with its PR; warn and continue, never refuse.
+if [ "$TEARDOWN_META_KIND" = scout ] && [ -f "$DATA/$ID/brief.md" ]; then
+  TEARDOWN_REVIEW_PR=$(sed -n 's/^PR review: \(https:[^ ]*\) head=.*/\1/p' "$DATA/$ID/brief.md" | head -n 1)
+  [ -z "$TEARDOWN_REVIEW_PR" ] || echo "warning: $ID reviews $TEARDOWN_REVIEW_PR; review workers stay until the captain says they are done with that PR (pr-review skill)" >&2
 fi
 TEARDOWN_CLEANUP_RECOVERY=$(fm_meta_get "$META" cleanup_recovery)
 TEARDOWN_META_SPAWN_GEN=

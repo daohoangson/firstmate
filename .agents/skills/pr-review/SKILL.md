@@ -1,0 +1,64 @@
+---
+name: pr-review
+description: Load before dispatching, re-dispatching, or cleaning up any PR-review task - a scout that reviews an existing pull request.
+user-invocable: false
+metadata:
+  internal: true
+---
+
+# PR review intake and cleanup
+
+A PR-review task is a scout whose deliverable is a review report on someone's existing pull request.
+Follow every step below for each review and each re-review round, because an earlier brief carries an earlier head, an earlier focus, and earlier mistakes.
+`bin/fm-brief.sh --pr-review` writes the review marker, the PR's current head, the home's reviewer instructions, and a Focus placeholder; its header owns the exact behavior.
+
+## 1. Inventory the PR
+
+- Run `gh pr view <url> --json title,body,files,author,baseRefName,headRefOid,closingIssuesReferences`.
+- Read the linked issues and any companion PRs the body, the issues, or the branch name point at.
+- Run the group check: when companion PRs ship one change together, they get one review task covering the group, not one task per PR.
+- Before dispatching a round, read the captain's latest word on that PR, so a closed or cancelled review is not dispatched again, and check that no round is already queued for this head.
+
+## 2. Build the Firstmate spec from the home's review files
+
+Scaffold every round with `bin/fm-brief.sh <id> <repo> --scout --pr-review <pr-url>` and build `## Firstmate spec` from what it writes, never from an earlier brief.
+The home keeps them, when it has them, at two `data/` paths:
+
+- `data/review-spec.md` - the standing review instructions this home applies to every review.
+- `data/review-focus.md` - the focus map: entries keyed by changed paths or PR signals, each naming focus areas and how to verify them.
+
+The scaffold pastes the `## Reviewer instructions` section of `data/review-spec.md` into the spec. Replace its `### Focus` placeholder with:
+
+- only the `data/review-focus.md` entries whose paths or signals match this PR's inventory, unioned across a group;
+- one to five PR-specific hypotheses drawn from the diff and the linked intent;
+- the threat-model scope, such as a private repository, test credentials, a feature flag that is off, or a developer-only tool.
+
+Paste nothing else from the focus map, so an unselected area cannot leak into the report.
+A captain focus given for one PR goes in that brief's `## Captain's intent`, not into the home's files, until the captain says it is general.
+When the home has neither file, write the spec from the inventory and the captain's words alone.
+
+## 3. Check the head and any prior report
+
+The scaffold reads the PR's current head from GitHub; if the PR moves before dispatch, scaffold again rather than editing the head.
+For a re-review, name the prior round's report path in the spec only after confirming the file exists and names the prior head.
+
+## 4. Keep evidence beside the report
+
+The review brief tells the worker to save evidence in the home's `data/<task-id>/evidence/`, beside `data/<task-id>/report.md`.
+Evidence left only in the worker's copy is lost at cleanup.
+
+## 5. Keep the worker until the captain is done with the PR
+
+Never clean up a PR-review worker after its report.
+The worker stays alive for follow-up questions and later rounds until the captain says they are done with that PR.
+On that word, copy any evidence still inside the worker's copy into `data/<task-id>/evidence/`, and only then clean up every review task of that PR.
+Cleanup of a review task prints a reminder of this rule.
+
+## 6. Learn into the focus map
+
+Update `data/review-focus.md` with a date and a pointer to the evidence, editing the matching entry rather than appending:
+
+- after a captain correction or added focus, edit the entry for those paths, or add one when the focus is new;
+- after a withdrawn or downgraded finding, add the check to verify first;
+- after a miss found later by another reviewer, a human, or the captain, add the check that would have found it;
+- when an area keeps coming back empty on a path, drop it from that entry.
