@@ -52,6 +52,12 @@ SH
   assert_no_grep "firstmate only" "$brief" "a section outside the reviewer instructions was pasted"
   assert_no_grep "not pasted" "$brief" "the section after the reviewer instructions was pasted"
   assert_grep "{FOCUS: only the data/review-focus.md entries" "$brief" "the Focus placeholder is missing"
+  assert_grep "save command output, screenshots, and other review evidence" "$brief" \
+    "the review brief did not direct durable evidence storage"
+  assert_grep "$home/data/rv-a/evidence/" "$brief" \
+    "the review brief did not name its durable evidence directory"
+  assert_no_grep "The report is the only thing that survives" "$brief" \
+    "the review brief contradicted its evidence-retention instruction"
   out=$(FAKE_GH_HEAD='' PATH="$fakebin:$PATH" FM_HOME="$home" \
     "$ROOT/bin/fm-brief.sh" rv-b proj --scout --pr-review https://github.com/acme/widgets/pull/42 2>&1) \
     && fail "an unreadable PR head should refuse the scaffold"

@@ -736,8 +736,12 @@ fi
 
 if [ "$KIND" = scout ]; then
 SCOUT_WRITE_SCOPE="the report and status file below"
+SCOUT_SURVIVAL_LINE="The report is the only thing that survives, so anything worth keeping must be in it."
+PR_REVIEW_EVIDENCE_LINE=
 if [ -n "$PR_REVIEW_HEAD" ]; then
   SCOUT_WRITE_SCOPE="the report, its evidence directory \`$DATA/$ID/evidence/\`, and the status file below"
+  SCOUT_SURVIVAL_LINE="The report and its evidence directory survive teardown, so save anything worth keeping in one of them."
+  PR_REVIEW_EVIDENCE_LINE="For this PR review, save command output, screenshots, and other review evidence in \`$DATA/$ID/evidence/\`, not only in this worktree."
   SETUP_BASE="$SETUP_BASE
 PR review: $PR_REVIEW_URL head=$PR_REVIEW_HEAD
 Review exactly that head of that existing pull request."
@@ -758,7 +762,7 @@ $HERDR_SECTION
 $SETUP_BASE
 This is a SCOUT task: the deliverable is a written report, not a PR.
 The worktree is your laboratory - install, run, edit, and make scratch commits freely; all of it is discarded at teardown.
-The report is the only thing that survives, so anything worth keeping must be in it.
+$SCOUT_SURVIVAL_LINE
 
 # Rules
 1. Never push to any remote and never open a PR.
@@ -788,6 +792,7 @@ $WAIT_BLOCK$INBOX_SECTION
 # Definition of done
 Write your findings to \`$DATA/$ID/report.md\`.
 The report must stand alone: what you did, what you found, the evidence (commands run, output, file:line references), and what you recommend.
+$PR_REVIEW_EVIDENCE_LINE
 $LAVISH_LINE
 Before reporting done, read and follow \`$FM_ROOT/.agents/skills/captain-hold-lifecycle/SKILL.md\` and pass its shared completion gate for the report and any visual review.
 Only when the reviewed inventory is empty, run \`FM_HOME=$(shell_quote "$FM_HOME") bash $(shell_quote "$FM_ROOT/bin/fm-captain-hold.sh") complete $(shell_quote "$ID") --none\`.
