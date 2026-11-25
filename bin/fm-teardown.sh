@@ -82,9 +82,9 @@
 # for the common case where there is no remote at all.
 # Safety is proved again after task processes are reaped, before backlog-close
 # publication, branch deletion, or worktree return.
-# A PR-review scout (review_pr= in meta) additionally refuses, before any
-# cleanup step and even with --force, while config/pr-review-guard is on and
-# the captain's done-record is missing; bin/fm-pr-review-lib.sh owns that rule.
+# A scout whose brief carries the bin/fm-brief.sh --pr-review marker gets one
+# warning that review workers stay until the captain is done with that PR;
+# cleanup then continues normally.
 # Scout tasks (kind=scout in meta) carve out of that check: their worktree is
 # declared scratch and the report at data/<task-id>/report.md is the work
 # product. Teardown proceeds only once the report exists and the shared
@@ -405,7 +405,6 @@ for _teardown_source in \
   fm-composer-lib.sh \
   fm-cursor-lib.sh \
   fm-nm-run-lib.sh \
-  fm-pr-review-lib.sh \
   fm-wake-lib.sh \
   fm-path-lib.sh \
   fm-lease-lib.sh
@@ -437,8 +436,6 @@ unset _teardown_source
 . "$SCRIPT_DIR/fm-secondmate-parent-lib.sh"
 # shellcheck source=bin/fm-nm-run-lib.sh
 . "$SCRIPT_DIR/fm-nm-run-lib.sh"
-# shellcheck source=bin/fm-pr-review-lib.sh
-. "$SCRIPT_DIR/fm-pr-review-lib.sh"
 # Archive paths live only in teardown; presentation/wake readers stay unaware.
 teardown_archive_directory() {  # <directory>
   if [ -L "$1" ] || { [ -e "$1" ] && [ ! -d "$1" ]; }; then
@@ -691,12 +688,11 @@ if [ "$TEARDOWN_META_KIND" = secondmate ]; then
   }
   SM_LIVENESS_LOCK="$STATE/.secondmate-liveness-$ID.lock"
 fi
-# A PR-review scout stays alive until the captain is done with its PR
-# (bin/fm-pr-review-lib.sh owns the marker and this opt-in refusal; --force
-# does not lift it).
-TEARDOWN_REVIEW_PR=$(fm_meta_get "$META" review_pr)
-if [ "$TEARDOWN_META_KIND" = scout ] && [ -n "$TEARDOWN_REVIEW_PR" ] && fm_pr_review_guard_enabled "$CONFIG"; then
-  fm_pr_review_teardown_check "$DATA" "$ID" "$TEARDOWN_REVIEW_PR" || exit 1
+# A PR-review scout (bin/fm-brief.sh --pr-review marker) stays alive until the
+# captain is done with its PR; warn and continue, never refuse.
+if [ "$TEARDOWN_META_KIND" = scout ] && [ -f "$DATA/$ID/brief.md" ]; then
+  TEARDOWN_REVIEW_PR=$(sed -n 's/^PR review: \(https:[^ ]*\) head=.*/\1/p' "$DATA/$ID/brief.md" | head -n 1)
+  [ -z "$TEARDOWN_REVIEW_PR" ] || echo "warning: $ID reviews $TEARDOWN_REVIEW_PR; review workers stay until the captain says they are done with that PR (pr-review skill)" >&2
 fi
 TEARDOWN_CLEANUP_RECOVERY=$(fm_meta_get "$META" cleanup_recovery)
 TEARDOWN_META_SPAWN_GEN=

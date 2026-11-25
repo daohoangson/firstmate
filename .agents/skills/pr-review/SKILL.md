@@ -10,7 +10,7 @@ metadata:
 
 A PR-review task is a scout whose deliverable is a review report on someone's existing pull request.
 Follow every step below for each review and each re-review round, because an earlier brief carries an earlier head, an earlier focus, and earlier mistakes.
-`bin/fm-pr-review-lib.sh` owns the review marker and the two opt-in guards that enforce steps 3 and 5; its header owns their exact rules.
+`bin/fm-brief.sh --pr-review` writes the review marker, the PR's current head, the home's reviewer instructions, and a Focus placeholder; its header owns the exact behavior.
 
 ## 1. Inventory the PR
 
@@ -21,15 +21,14 @@ Follow every step below for each review and each re-review round, because an ear
 
 ## 2. Build the Firstmate spec from the home's review files
 
-Build `## Firstmate spec` from the home's review files every time, never from an earlier brief.
+Scaffold every round with `bin/fm-brief.sh <id> <repo> --scout --pr-review <pr-url>` and build `## Firstmate spec` from what it writes, never from an earlier brief.
 The home keeps them, when it has them, at two `data/` paths:
 
 - `data/review-spec.md` - the standing review instructions this home applies to every review.
 - `data/review-focus.md` - the focus map: entries keyed by changed paths or PR signals, each naming focus areas and how to verify them.
 
-Then write the brief's spec from:
+The scaffold pastes the `## Reviewer instructions` section of `data/review-spec.md` into the spec. Replace its `### Focus` placeholder with:
 
-- the review instructions from `data/review-spec.md` that apply to this PR;
 - only the `data/review-focus.md` entries whose paths or signals match this PR's inventory, unioned across a group;
 - one to five PR-specific hypotheses drawn from the diff and the linked intent;
 - the threat-model scope, such as a private repository, test credentials, a feature flag that is off, or a developer-only tool.
@@ -38,12 +37,10 @@ Paste nothing else from the focus map, so an unselected area cannot leak into th
 A captain focus given for one PR goes in that brief's `## Captain's intent`, not into the home's files, until the captain says it is general.
 When the home has neither file, write the spec from the inventory and the captain's words alone.
 
-## 3. Declare the PR, its head, and any prior report
+## 3. Check the head and any prior report
 
-Scaffold the brief with `bin/fm-brief.sh <id> <repo> --scout --pr-review <pr-url> --pr-head <sha>`, adding `--prior-report <path>` for a re-review.
-Take the head from step 1's `headRefOid`, never from an earlier brief.
-For a re-review, pass the report of the round that reviewed the prior head and confirm that report names that head.
-With `config/pr-review-guard` on, a fresh spawn refuses a declared head the PR no longer has and a prior report that does not exist (docs/configuration.md "PR-review guard").
+The scaffold reads the PR's current head from GitHub; if the PR moves before dispatch, scaffold again rather than editing the head.
+For a re-review, name the prior round's report path in the spec only after confirming the file exists and names the prior head.
 
 ## 4. Keep evidence beside the report
 
@@ -54,8 +51,8 @@ Evidence left only in the worker's copy is lost at cleanup.
 
 Never clean up a PR-review worker after its report.
 The worker stays alive for follow-up questions and later rounds until the captain says they are done with that PR.
-On that word, copy any evidence still inside the worker's copy into `data/<task-id>/evidence/`, record it with `bin/fm-pr-review-done.sh <task-id>...` for every live review task of that PR, and only then clean up.
-With `config/pr-review-guard` on, cleanup refuses a review task without that record, even with `--force`.
+On that word, copy any evidence still inside the worker's copy into `data/<task-id>/evidence/`, and only then clean up every review task of that PR.
+Cleanup of a review task prints a reminder of this rule.
 
 ## 6. Learn into the focus map
 

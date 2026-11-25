@@ -2018,40 +2018,6 @@ test_scout_nested_clone_returns_with_no_untracked_entries() {
   pass "scout copy with a nested clone and a scratch file returns with no untracked entries"
 }
 
-# A PR-review scout under config/pr-review-guard stays alive, even with
-# --force, until the captain's done-record exists (bin/fm-pr-review-lib.sh).
-test_pr_review_scout_waits_for_the_captain_done_record() {
-  local case_dir rc pr=https://github.com/acme/widgets/pull/42
-  case_dir=$(make_case pr-review-keep)
-  write_meta "$case_dir" no-mistakes scout
-  printf 'review_pr=%s\n' "$pr" >> "$case_dir/state/task-x1.meta"
-  prepare_scout_teardown "$case_dir"
-  : > "$case_dir/config/pr-review-guard"
-
-  set +e
-  run_teardown "$case_dir" --force > "$case_dir/stdout" 2> "$case_dir/stderr"
-  rc=$?
-  set -e
-  expect_code 1 "$rc" "pr-review-keep: teardown should refuse without the captain's done-record"
-  assert_grep "stays alive until the captain says they are done with that PR" "$case_dir/stderr" \
-    "pr-review-keep: refusal did not explain the keep-alive rule"
-  assert_grep "bin/fm-pr-review-done.sh task-x1" "$case_dir/stderr" \
-    "pr-review-keep: refusal did not name the remedy command"
-  assert_present "$case_dir/state/task-x1.meta" "pr-review-keep: refusal removed the task record"
-  assert_present "$case_dir/wt/.git" "pr-review-keep: refusal removed the copy"
-
-  FM_STATE_OVERRIDE="$case_dir/state" FM_DATA_OVERRIDE="$case_dir/data" \
-    "$ROOT/bin/fm-pr-review-done.sh" task-x1 >/dev/null \
-    || fail "pr-review-keep: the done-record should be written"
-  set +e
-  run_teardown "$case_dir" > "$case_dir/stdout" 2> "$case_dir/stderr"
-  rc=$?
-  set -e
-  expect_code 0 "$rc" "pr-review-keep: teardown should proceed once the captain is done: $(cat "$case_dir/stderr")"
-  assert_absent "$case_dir/state/task-x1.meta" "pr-review-keep: teardown kept the task record after the done-record"
-  pass "a PR-review scout is kept until the captain's done-record exists, even with --force"
-}
-
 test_ship_nested_clone_is_refused_and_bytes_stay() {
   local case_dir wt rc head before after
   case_dir=$(make_case ship-nested-refuse)
@@ -6560,7 +6526,6 @@ test_untracked_only_refusal_diagnostic
 test_tracked_edit_refusal_diagnostic
 test_mixed_refusal_diagnostic
 test_scout_nested_clone_returns_with_no_untracked_entries
-test_pr_review_scout_waits_for_the_captain_done_record
 test_ship_nested_clone_is_refused_and_bytes_stay
 test_dirty_return_warns_which_slot_was_lost
 test_dirty_return_warns_even_when_a_later_step_refuses
