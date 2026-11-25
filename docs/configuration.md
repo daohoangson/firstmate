@@ -1770,6 +1770,16 @@ A refused spawn writes no task record, so the brief can be regenerated and the s
 The flag is read only for ship and scout spawns, secondmate charters never take it, and it is not inherited by secondmate homes.
 [`herdr-backend.md`](herdr-backend.md) owns the lab isolation contract itself; `bin/fm-spawn.sh`'s header owns the exact matching rule.
 
+## PR-review guard (config/pr-review-guard)
+
+The optional local, gitignored `config/pr-review-guard` presence flag opts this home into two refusals for PR-review tasks, the scouts whose brief `bin/fm-brief.sh --pr-review` marks as reviewing an existing pull request.
+Create it with `touch "$FM_HOME/config/pr-review-guard"`; remove it to turn both refusals off.
+With the flag present, `bin/fm-spawn.sh` refuses a fresh review launch whose declared head is not the pull request's current head on GitHub, whose current head cannot be read, or whose declared prior report does not exist, and a refused spawn writes no task record.
+With the flag present, `bin/fm-teardown.sh` refuses to clean up a review task until `bin/fm-pr-review-done.sh <task-id>` has recorded that the captain is done with its pull request, and `--force` does not lift that refusal.
+Without the flag, review tasks spawn and clean up as any scout does; the review marker is still recorded, and a malformed review declaration still refuses the spawn.
+The flag is not inherited by secondmate homes.
+[`bin/fm-pr-review-lib.sh`](../bin/fm-pr-review-lib.sh) owns the marker and the exact rules, and the `pr-review` skill owns the intake and cleanup procedure, including the optional `data/review-spec.md` and `data/review-focus.md` files a home keeps for building review briefs.
+
 ## Worker launch environment (config/launch-env-allowlist)
 
 The optional local, gitignored `config/launch-env-allowlist` limits the ambient environment passed to newly launched workers, scouts, and secondmates, including relaunches.

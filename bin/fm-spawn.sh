@@ -34,6 +34,10 @@
 #   bin/fm-herdr-lab.sh or a listed Herdr session/server lifecycle command must
 #   carry the Herdr isolation contract emitted by bin/fm-brief.sh --herdr-lab;
 #   the refusal names the first such match.
+#   A scout brief whose # Setup declares a PR review (bin/fm-pr-review-lib.sh
+#   owns the line and both guards) records review_pr= in the task record; with
+#   config/pr-review-guard present, a fresh launch refuses a declared head that
+#   is not the PR's current head or a declared prior report that does not exist.
 #   Every ship or scout spawn renders `launch-brief.md`; for a no-mistakes ship
 #   it also carries the current `--intent` contract and the extracted captain
 #   intent. A legacy mixed Task is accepted there only under bin/fm-dod-lib.sh's
@@ -967,6 +971,8 @@ fm_backlog_directory_present "$STATE" "state directory" || {
 . "$SCRIPT_DIR/fm-pr-lib.sh"
 # shellcheck source=bin/fm-dod-lib.sh
 . "$SCRIPT_DIR/fm-dod-lib.sh"
+# shellcheck source=bin/fm-pr-review-lib.sh
+. "$SCRIPT_DIR/fm-pr-review-lib.sh"
 # shellcheck source=bin/fm-role-lib.sh
 . "$SCRIPT_DIR/fm-role-lib.sh"
 # shellcheck source=bin/fm-trace-context-lib.sh
@@ -1010,6 +1016,7 @@ MODE_SET=0
 YOLO_SET=0
 BRANCH_PREFIX_SET=0
 BASE_BRANCH=
+REVIEW_PR=
 BASE_BRANCH_SET=0
 UPSTREAM_CONSENT=
 UPSTREAM_CONSENT_SET=0
@@ -4325,6 +4332,21 @@ if [ "$KIND" = ship ] || [ "$KIND" = scout ]; then
       exit 1
     fi
   fi
+  if [ "$KIND" = scout ]; then
+    PR_REVIEW_RC=0
+    fm_pr_review_parse "$BRIEF" || PR_REVIEW_RC=$?
+    case "$PR_REVIEW_RC" in
+      0) REVIEW_PR=$FM_PR_REVIEW_URL ;;
+      1) ;;
+      *)
+        echo "error: $BRIEF has an invalid PR review declaration: $FM_PR_REVIEW_ERROR; regenerate it with bin/fm-brief.sh --pr-review" >&2
+        exit 1
+        ;;
+    esac
+    if [ -n "$REVIEW_PR" ] && [ "$RELAUNCH" -eq 0 ] && fm_pr_review_guard_enabled "$CONFIG"; then
+      fm_pr_review_spawn_check "$BRIEF" || exit 1
+    fi
+  fi
   if fm_brief_task_placeholders_present "$BRIEF"; then
     echo "error: $BRIEF still contains {TASK} or {FIRSTMATE_SPEC}; fill ## Captain's intent and ## Firstmate spec before spawn" >&2
     exit 1
@@ -7342,6 +7364,8 @@ preserve_relaunch_meta() {
   echo "tasktmp=$TASK_TMP"
   [ -z "$BASE_BRANCH" ] || echo "base_branch=$BASE_BRANCH"
   [ -z "$UPSTREAM_CONSENT" ] || echo "upstream_consent=$UPSTREAM_CONSENT"
+  # A relaunch keeps review_pr= through preserve_relaunch_meta.
+  [ -z "$REVIEW_PR" ] || [ "$RELAUNCH" -eq 1 ] || echo "review_pr=$REVIEW_PR"
   # Read by bin/fm-dod-lib.sh's ready-report gate; absent on every other forge.
   [ "$EXTERNAL_REVIEW" = 0 ] || echo "forge=external"
   [ -z "$EXTERNAL_BACKUP_REMOTE" ] || echo "backup_remote=$EXTERNAL_BACKUP_REMOTE"

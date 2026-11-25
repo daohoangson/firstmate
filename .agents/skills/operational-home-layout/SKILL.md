@@ -52,6 +52,7 @@ config/lavish-axi-host  optional one-line per-machine Lavish server address; LOC
 config/brief-include.md  optional standing worker instructions appended verbatim as the last section of every ship and scout scaffold; LOCAL, gitignored, and not inherited; keep its text out of `## Firstmate spec`; see docs/configuration.md "Home brief include"
 config/branch-prompt-include.md  optional standing home rules appended verbatim as the last section of the supervision branch prompt; LOCAL, gitignored, and not inherited; see docs/configuration.md "Home branch prompt include"
 config/herdr-lifecycle-spawn-guard  optional presence flag opting this home into the default-off spawn refusal of a ship or scout brief that names a Herdr lifecycle command without the Herdr isolation contract; LOCAL, gitignored, and not inherited; see docs/configuration.md "Herdr lifecycle spawn guard"
+config/pr-review-guard  optional presence flag opting this home into the default-off spawn refusal of a stale PR-review brief and the cleanup refusal of a PR-review task the captain has not released; LOCAL, gitignored, and not inherited; see docs/configuration.md "PR-review guard"
 config/fleet-ledger  optional presence flag opting this home in to the default-off fleet activity ledger state/fleet-ledger.jsonl that outside tools can follow; LOCAL, gitignored, and not inherited; see docs/fleet-ledger.md
 config/firstmate-role  optional LOCAL, gitignored firstmate-repository publication role; see docs/configuration.md "Firstmate role" for operator opt-in and secondmate inheritance
 config/wait-no-turns  optional presence flag opting this home into default-off waiting-worker behavior (brief waiting section, foreground pipeline drive, pending-reply hold, one fire-and-forget retry ring); LOCAL, gitignored, and not inherited; see docs/configuration.md "Waiting worker spends no turns"
@@ -84,6 +85,9 @@ data/                personal fleet records; LOCAL, gitignored as a whole
   secondmates.md      local and remote secondmate routing table; firstmate-private, maintained by the secondmate seed helpers (section 6)
   <id>/brief.md      per-task crewmate brief, or per-secondmate charter brief when kind=secondmate
   <id>/report.md     scout task deliverable, written by the crewmate; survives teardown
+  <id>/evidence/     PR-review evidence written by the reviewing scout beside its report; survives teardown
+  <id>/pr-review-done  captain's done-record for a PR-review task, written by bin/fm-pr-review-done.sh
+  review-spec.md review-focus.md  optional standing review instructions and path-keyed focus map a home keeps for PR-review briefs; LOCAL, gitignored; the pr-review skill owns their use
   <id>/status.log <id>/status.<N>.log <id>/children/<child>/...  optional teardown archives; see docs/architecture.md "Task status archives"
   pipeline-spend.jsonl  optional per-task no-mistakes pipeline spend, written only when config/pipeline-spend is present; bin/fm-pipeline-spend.sh owns the schema
 projects/            cloned repos; gitignored; read-only except under hard rule 1's concrete captain-approved project operation exception
